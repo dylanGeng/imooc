@@ -53,7 +53,7 @@ func (r *ReadFromFile) Read(rc chan string) {
 		} else if err != nil {
 			panic(fmt.Sprintf("ReadBytes error:%s", err.Error()))
 		}
-		rc <- string(line)
+		rc <- string(line[:len(line)-1])
 	}
 
 }
@@ -94,6 +94,6 @@ func main() {
 
 	go lp.write.Write(lp.wc)
 
-	time.Sleep(1*time.Second)
+	time.Sleep(30*time.Second)
 
 }
