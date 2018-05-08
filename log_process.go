@@ -1,6 +1,9 @@
 package main
 
-type
+type LogProcess struct {
+	path string
+	dns string
+}
 
 func main() {
 	
