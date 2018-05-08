@@ -4,6 +4,9 @@ import (
 	"strings"
 	"fmt"
 	"time"
+	"os"
+	"bufio"
+	"io"
 )
 
 type Reader interface {
@@ -24,12 +27,35 @@ type WriteToInfluxDB struct {
 
 func (w *WriteToInfluxDB) Write(wc chan string) {
 	//write module
-	fmt.Println(<-wc)
+	for v := range wc {
+		fmt.Println(v)
+	}
 }
 
 func (r *ReadFromFile) Read(rc chan string) {
 	//Read Module
-	rc <- "Hello, Dylan"
+
+	//open file
+	file, err := os.Open(r.path)
+	if err != nil {
+		panic(fmt.Sprintf("open file error:%s", err.Error()))
+	}
+
+	//从文件末尾逐行开始读取文件内容
+	file.Seek(0,2)
+	rd := bufio.NewReader(file)
+
+	for {
+		line, err := rd.ReadBytes('\n')
+		if err == io.EOF {
+			time.Sleep(500 * time.Millisecond)
+			continue
+		} else if err != nil {
+			panic(fmt.Sprintf("ReadBytes error:%s", err.Error()))
+		}
+		rc <- string(line)
+	}
+
 }
 
 type LogProcess struct {
@@ -41,8 +67,9 @@ type LogProcess struct {
 
 func (l *LogProcess) Process(){
 	//process
-	ct := <- l.rc
-	l.wc <- strings.ToUpper(ct)
+	for v := range l.rc {
+		l.wc <- strings.ToUpper(v)
+	}
 }
 
 func main() {
